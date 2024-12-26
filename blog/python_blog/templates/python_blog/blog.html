@@ -8,10 +8,10 @@
 <div class="row">
     <div class="col-12">
         {% for post in posts %}
-        {% include 'post_preview_include.html' %}
+        {% include 'python_blog/post_preview_include.html' %}
         {% empty %}
         <div class="alert alert-info">
-            <i>Посты не найдены</i> 
+            <i>Посты не найдены</i>
         </div>
         {% endfor %}
     </div>

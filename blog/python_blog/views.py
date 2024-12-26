@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse
+from .blog_data import dataset
 
 CATEGORIES = [
     {'slug': 'python', 'name': 'Python'},
@@ -14,11 +15,6 @@ TAGS = [
     {'slug': 'html', 'name': 'HTML'},
     {'slug': 'css', 'name': 'CSS'},
     {'slug': 'sql', 'name': 'SQL'}
-]
-
-POSTS = [
-    {'slug': 'python_oop', 'title': 'Python OOP', 'text': 'Текст поста про python oop'},
-    {'slug': 'django_orm', 'title': 'Django ORM', 'text': 'Текст поста про django orm'}
 ]
 
 def main(request):
@@ -36,7 +32,10 @@ def about(request):
     return render(request, "about.html")
 
 def catalog_posts(request):
-    return render(request, 'python_blog/blog.html')
+    context = {
+            'posts': dataset
+    }
+    return render(request, 'python_blog/blog.html', context=context)
 
 def post_detail(request, post_slug):
     post = [post for post in POSTS if post['slug'] == post_slug]
@@ -82,7 +81,7 @@ def tag_detail(request, tag_slug):
     else:
         name = tag_slug
 
-    return HttpResponse(f'''
-        <h1>Тег {name}</h1>
-        <p><a href="{reverse('blog:tags')}">Назад к списку тегов</a></p>
-        ''')
+    context = {
+        'name': name
+    }
+    return render(request, 'python_blog/tag_detail.html', context=context)
