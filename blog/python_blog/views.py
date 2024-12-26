@@ -36,16 +36,7 @@ def about(request):
     return render(request, "about.html")
 
 def catalog_posts(request):
-    links = []
-    for post in POSTS:
-        url = reverse('blog:post_detail', args=[post['slug']])
-        links.append(f'<p><a href="{url}">{post}</a></p>')
-
-    return HttpResponse(f'''
-        <h1>Cписок всех постов</h1>
-        {''.join(links)}
-        <p><a href="{reverse('main')}">На главную страницу</a></p>
-''')
+    return render(request, 'python_blog/blog.html')
 
 def post_detail(request, post_slug):
     post = [post for post in POSTS if post['slug'] == post_slug]
@@ -62,15 +53,10 @@ def post_detail(request, post_slug):
         ''')
 
 def catalog_categories(request):
-    links = []
-    for category in CATEGORIES:
-        url = reverse('blog:category_detail', args=[category['slug']])
-        links.append(f'<p><a href="{url}">{category}</a></p>')
-
-    return HttpResponse(f'''
-        <h1>Cписок всех категорий</h1>
-        {''.join(links)}
-        <p><a href="{reverse('blog:posts')}">К списпку постов</a></p>''')
+    context = {
+        'categories': CATEGORIES
+    }
+    return render(request, 'python_blog/catalog_categories.html', context=context)
 
 def category_detail(request, category_slug):
     category = [cat for cat in CATEGORIES if cat['slug'] == category_slug][0]
@@ -78,22 +64,16 @@ def category_detail(request, category_slug):
         name = category['name']
     else:
         name = category_slug
-
-    return HttpResponse(f'''
-        <h1>Категория {name}</h1>
-        <p><a href="{reverse('blog:categories')}">Назад к категориям</a></p>
-        ''')
+    context = {
+        'name': name
+    }
+    return render(request, 'python_blog/category_detail.html', context=context)
 
 def catalog_tags(request):
-    links = []
-    for tag in TAGS:
-        url = reverse('blog:tags_detail', args=[tag['slug']])
-        links.append(f'<p><a href="{url}">{tag}</a></p>')
-
-    return HttpResponse(f'''
-        <h1>Cписок всех тегов</h1>
-        {''.join(links)}
-        <p><a href="{reverse('blog:posts')}">К списпку постов</a></p>''')
+    context = {
+        'tags': TAGS
+    }
+    return render(request, 'python_blog/tags_catalog.html', context=context)
 
 def tag_detail(request, tag_slug):
     tag = [tag for tag in TAGS if tag['slug'] == tag_slug][0]
