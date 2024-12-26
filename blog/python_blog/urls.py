@@ -4,7 +4,7 @@ from python_blog.views import catalog_posts,post_detail,catalog_categories,categ
 app_name = 'blog'
 
 urlpatterns = [
-    path('/', catalog_posts, name = 'posts'),
+    path('', catalog_posts, name = 'posts'),
 # Категории
     path('categories/', catalog_categories, name = 'categories'),
     path('categories/<slug:category_slug>/', category_detail, name = 'category_detail'),

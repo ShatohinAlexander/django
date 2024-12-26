@@ -22,15 +22,21 @@ POSTS = [
 ]
 
 def main(request):
-    # catalog_categories_url = reverse('blog:categories')
-    # catalog_tags_url = reverse('blog:tags')
-    return render(request, 'main.html')
+    catalog_categories_url = reverse("blog:categories")
+    catalog_tags_url = reverse("blog:tags")
+
+    context = {
+        "title": "Главная страница",
+        "text": "Текст главной страницы",
+        "user_status": "moderator",
+    }
+    return render(request, "main.html", context)
 
 def catalog_posts(request):
     links = []
     for post in POSTS:
         url = reverse('blog:post_detail', args=[post['slug']])
-        links.append(f'<p><a href="{url}">{post['title']}</a></p>')
+        links.append(f'<p><a href="{url}">{post}</a></p>')
 
     return HttpResponse(f'''
         <h1>Cписок всех постов</h1>
@@ -56,7 +62,7 @@ def catalog_categories(request):
     links = []
     for category in CATEGORIES:
         url = reverse('blog:category_detail', args=[category['slug']])
-        links.append(f'<p><a href="{url}">{category['name']}</a></p>')
+        links.append(f'<p><a href="{url}">{category}</a></p>')
 
     return HttpResponse(f'''
         <h1>Cписок всех категорий</h1>
@@ -79,7 +85,7 @@ def catalog_tags(request):
     links = []
     for tag in TAGS:
         url = reverse('blog:tags_detail', args=[tag['slug']])
-        links.append(f'<p><a href="{url}">{tag['name']}</a></p>')
+        links.append(f'<p><a href="{url}">{tag}</a></p>')
 
     return HttpResponse(f'''
         <h1>Cписок всех тегов</h1>
