@@ -2,21 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse
 from .blog_data import dataset
-from .models import Post
-
-CATEGORIES = [
-    {'slug': 'python', 'name': 'Python'},
-    {'slug': 'django', 'name': 'Django'},
-    {'slug': 'postgresql', 'name': 'PostgreSQL'},
-    {'slug': 'docker', 'name': 'Docker'},
-    {'slug': 'linux', 'name': 'Linux'},
-]
-
-TAGS = [
-    {'slug': 'html', 'name': 'HTML'},
-    {'slug': 'css', 'name': 'CSS'},
-    {'slug': 'sql', 'name': 'SQL'}
-]
+from .models import Post, Category, Tag
 
 def main(request):
     # catalog_categories_url = reverse("blog:categories")
@@ -53,10 +39,14 @@ def post_detail(request, post_slug):
     return render(request, 'python_blog/post_detail.html', context=context)
 
 def catalog_categories(request):
+    categories = Category.objects.all()
+    categories_count = {cat.name:cat.posts.count() for cat in categories}
     context = {
-        'categories': CATEGORIES
+        'categories': categories,
+        'categories_count': categories_count
     }
     return render(request, 'python_blog/catalog_categories.html', context=context)
+    
 
 def category_detail(request, category_slug):
     category = [cat for cat in CATEGORIES if cat['slug'] == category_slug][0]
