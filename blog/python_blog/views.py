@@ -38,12 +38,16 @@ def catalog_posts(request):
         else:
             q_obj |= Q(content__icontains=search)
 
-    posts = Post.objects.filter(q_obj).select_related("category").prefetch_related("tags").order_by("-created_at")
+    posts = (
+        Post.objects.filter(q_obj)
+        .select_related("category")
+        .prefetch_related("tags")
+        .order_by("-created_at")
+    )
 
     paginator = Paginator(posts, 3)
     page_num = request.GET.get("page", 1)
     paginator = paginator.get_page(page_num)
-    
 
     context = {
         "posts": paginator,
@@ -60,6 +64,14 @@ def post_detail(request, post_slug):
             post = item
     if post is None:
         return render(request, "404.html")
+    
+    session = request.session
+    session_key = f"post_views_{post.id}"
+    if session_key not in session:
+        post.views = F("views") + 1
+        post.save()
+        post.refresh_from_db()
+        session[session_key] = True
 
     context = {"post": post}
     return render(request, "python_blog/post_detail.html", context=context)
