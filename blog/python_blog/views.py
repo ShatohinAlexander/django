@@ -49,31 +49,20 @@ def catalog_categories(request):
     
 
 def category_detail(request, category_slug):
-    category = [cat for cat in CATEGORIES if cat['slug'] == category_slug][0]
-    if category:
-        name = category['name']
-    else:
-        name = category_slug
-    context = {
-        'name': name
-    }
+    category = Category.objects.get(slug=category_slug)
+    context = {'category': category}
     return render(request, 'python_blog/category_detail.html', context=context)
 
 def catalog_tags(request):
-    context = {
-        'tags': TAGS
-    }
+    tags = Tag.objects.all()
+    context = {'tags':tags}
     return render(request, 'python_blog/tags_catalog.html', context=context)
 
 def tag_detail(request, tag_slug):
-    tag = [tag for tag in TAGS if tag['slug'] == tag_slug][0]
-    if tag:
-        name = tag['name']
-    else:
-        name = tag_slug
+    tag = Tag.objects.get(slug=tag_slug)
 
     context = {
-        'name': name
+        'tag': tag
     }
     return render(request, 'python_blog/tag_detail.html', context=context)
 

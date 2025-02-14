@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Тег: {{name}}</h1>
+<h1>Тег: {{tag.name}}</h1>
 <p>Список постов с этим тегом</p>
+<div class='row'>
+    <div class="col">
+        {% for post in tag.posts.all %}
+            {% include "python_blog/post_preview_include.html" %}
+        {% endfor %}
+    </div>
+</div>
 {% endblock content %}
