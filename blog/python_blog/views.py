@@ -56,7 +56,19 @@ def catalog_categories(request):
 
 def category_detail(request, category_slug):
     category = Category.objects.get(slug=category_slug)
-    context = {'category': category}
+
+    posts = (
+        Post.objects.filter(category=category)
+        .select_for_update("category")
+        .prefetch_related("tags")
+    )
+    paginator = Paginator(posts, 3)
+    page_num = request.GET.get("page", 1)
+    paginator = paginator.get_page(page_num)
+
+    context = {'category': category,
+               'posts': paginator}
+    
     return render(request, 'python_blog/category_detail.html', context=context)
 
 def catalog_tags(request):
