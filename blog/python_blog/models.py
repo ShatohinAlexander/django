@@ -29,6 +29,7 @@ class Post(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_date = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+    views = models.IntegerField(default=0, verbose_name="Просмотры")
 
     def save(self, *args, **kwargs):
         if not self.slug:
