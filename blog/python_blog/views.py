@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from django.http import HttpResponse
 from django.urls import reverse
+from django.core.paginator import Paginator
 from .blog_data import dataset
 from .models import Post, Category, Tag
 
@@ -19,9 +19,15 @@ def about(request):
     return render(request, "about.html")
 
 def catalog_posts(request):
-    posts = Post.objects.all()
+    posts = Post.objects.select_related("category").prefetch_related("tags")
+
+    paginator = Paginator(posts, 3)
+    page_num = request.GET.get("page", 1)
+    paginator = paginator.get_page(page_num)
+
     context = {
-            'posts': posts
+            "posts": paginator,
+            "posts_count": posts.count(),
     }
     return render(request, 'python_blog/blog.html', context=context)
 
