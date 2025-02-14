@@ -1,8 +1,11 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.core.paginator import Paginator
+from django.db.models import F, Q, Count
+from python_blog.forms import PostForm, SearchForm
 from .blog_data import dataset
 from .models import Post, Category, Tag
+
 
 def main(request):
     # catalog_categories_url = reverse("blog:categories")
@@ -15,21 +18,40 @@ def main(request):
     }
     return render(request, "main.html", context=context)
 
+
 def about(request):
     return render(request, "about.html")
 
+
 def catalog_posts(request):
-    posts = Post.objects.select_related("category").prefetch_related("tags")
+
+    forms = SearchForm(request.GET)
+    q_obj = Q()
+
+    if forms.is_valid():
+        search = forms.cleaned_data.get("search")
+        s_from = forms.cleaned_data.get("s_from")
+        if s_from == "title":
+            q_obj |= Q(title__icontains=search)
+        elif s_from == "tags":
+            q_obj |= Q(tags__name__icontains=search)
+        else:
+            q_obj |= Q(content__icontains=search)
+
+    posts = Post.objects.filter(q_obj).select_related("category").prefetch_related("tags").order_by("-created_at")
 
     paginator = Paginator(posts, 3)
     page_num = request.GET.get("page", 1)
     paginator = paginator.get_page(page_num)
+    
 
     context = {
-            "posts": paginator,
-            "posts_count": posts.count(),
+        "posts": paginator,
+        "posts_count": posts.count(),
+        "form": forms,
     }
-    return render(request, 'python_blog/blog.html', context=context)
+    return render(request, "python_blog/blog.html", context=context)
+
 
 def post_detail(request, post_slug):
     post = None
@@ -37,22 +59,18 @@ def post_detail(request, post_slug):
         if item.slug == post_slug:
             post = item
     if post is None:
-        return render(request, '404.html')
-    
-    context = {
-        'post': post
-    }
-    return render(request, 'python_blog/post_detail.html', context=context)
+        return render(request, "404.html")
+
+    context = {"post": post}
+    return render(request, "python_blog/post_detail.html", context=context)
+
 
 def catalog_categories(request):
     categories = Category.objects.all()
-    categories_count = {cat.name:cat.posts.count() for cat in categories}
-    context = {
-        'categories': categories,
-        'categories_count': categories_count
-    }
-    return render(request, 'python_blog/catalog_categories.html', context=context)
-    
+    categories_count = {cat.name: cat.posts.count() for cat in categories}
+    context = {"categories": categories, "categories_count": categories_count}
+    return render(request, "python_blog/catalog_categories.html", context=context)
+
 
 def category_detail(request, category_slug):
     category = Category.objects.get(slug=category_slug)
@@ -66,21 +84,19 @@ def category_detail(request, category_slug):
     page_num = request.GET.get("page", 1)
     paginator = paginator.get_page(page_num)
 
-    context = {'category': category,
-               'posts': paginator}
-    
-    return render(request, 'python_blog/category_detail.html', context=context)
+    context = {"category": category, "posts": paginator}
+
+    return render(request, "python_blog/category_detail.html", context=context)
+
 
 def catalog_tags(request):
     tags = Tag.objects.all()
-    context = {'tags':tags}
-    return render(request, 'python_blog/tags_catalog.html', context=context)
+    context = {"tags": tags}
+    return render(request, "python_blog/tags_catalog.html", context=context)
+
 
 def tag_detail(request, tag_slug):
     tag = Tag.objects.get(slug=tag_slug)
 
-    context = {
-        'tag': tag
-    }
-    return render(request, 'python_blog/tag_detail.html', context=context)
-
+    context = {"tag": tag}
+    return render(request, "python_blog/tag_detail.html", context=context)
