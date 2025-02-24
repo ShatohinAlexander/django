@@ -5,6 +5,9 @@ from django.db.models import F, Q, Count
 from python_blog.forms import PostForm, SearchForm
 from .blog_data import dataset
 from .models import Post, Category, Tag
+from django.shortcuts import redirect
+from django.utils.text import slugify
+from unidecode import unidecode
 
 
 def main(request):
@@ -64,7 +67,7 @@ def post_detail(request, post_slug):
             post = item
     if post is None:
         return render(request, "404.html")
-    
+
     session = request.session
     session_key = f"post_views_{post.id}"
     if session_key not in session:
@@ -112,3 +115,47 @@ def tag_detail(request, tag_slug):
 
     context = {"tag": tag}
     return render(request, "python_blog/tag_detail.html", context=context)
+
+
+def post_create(request):
+    if request.method == "POST":
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+
+            tags = form.cleaned_data.get("tag_string", "")
+            if tags:
+                tag_names = [t.strip() for t in tags.split(",")]
+                for tag_name in tag_names:
+                    if tag_name:
+                        tag, created = Tag.objects.get_or_create(
+                            name=tag_name,
+                            defaults={"slug": slugify(unidecode(tag_name))},
+                        )
+                        post.tags.add(tag)
+
+            return redirect(post.get_absolute_url())
+        context = {
+            "title": "Создание поста",
+            "name": "Создание поста",
+            "form": form,
+            "url_to": reverse(
+                "blog:post_create",
+            ),
+            "category": Category.objects.all(),
+            "name_form": "Создание поста",
+            "button_name": "Создать",
+        }
+        return render(request, "python_blog/post_create.html", context=context)
+    else:
+        form = PostForm()
+        context = {
+            "title": "Создание поста",
+            "name": "Создание поста",
+            "form": form,
+            "category": Category.objects.all(),
+            "name_form": "Создание поста",
+            "button_name": "Создать",
+        }
+        return render(request, "python_blog/post_create.html", context=context)

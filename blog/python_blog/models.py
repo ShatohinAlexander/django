@@ -8,6 +8,9 @@ class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
     slug = models.SlugField(unique=True, blank=True, verbose_name='URL')
 
+    def __str__(self):
+        return str(self.name)
+
 class Tag(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
     slug = models.SlugField(unique=True, blank=True, verbose_name='URL')
