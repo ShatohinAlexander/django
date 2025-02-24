@@ -5,7 +5,7 @@ from django.db.models import F, Q, Count
 from python_blog.forms import PostForm, SearchForm
 from .blog_data import dataset
 from .models import Post, Category, Tag
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.text import slugify
 from unidecode import unidecode
 
@@ -61,12 +61,7 @@ def catalog_posts(request):
 
 
 def post_detail(request, post_slug):
-    post = None
-    for item in Post.objects.all():
-        if item.slug == post_slug:
-            post = item
-    if post is None:
-        return render(request, "404.html")
+    post = get_object_or_404(Post, slug=post_slug)
 
     session = request.session
     session_key = f"post_views_{post.id}"
@@ -157,5 +152,41 @@ def post_create(request):
             "category": Category.objects.all(),
             "name_form": "Создание поста",
             "button_name": "Создать",
+        }
+        return render(request, "python_blog/post_create.html", context=context)
+
+def post_update(request, post_slug):
+    post = get_object_or_404(Post, slug=post_slug)
+    if request.method == "POST":
+        old_slug = post.slug
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.slug = old_slug
+            post.save()
+
+            tag_string  = form.cleaned_data.get("tag_string", "")
+            if tag_string :
+                post.tags.clear()
+                tag_names = [t.strip() for t in tag_string .split(",")]
+                for tag_name in tag_names:
+                    if tag_name:
+                        tag, created = Tag.objects.get_or_create(
+                            name=tag_name,
+                            defaults={"slug": slugify(unidecode(tag_name))},
+                        )
+                        post.tags.add(tag)
+
+            return redirect(post.get_absolute_url())
+    else:
+        form = PostForm(instance=post)
+        context = {
+            "title": "Редактирование поста",
+            "name": "Редактирование поста",
+            "form": form,
+            "category": Category.objects.all(),
+            "url_to": reverse("blog:post_update", kwargs={"post_slug": post.slug}),
+            "name_form": "Редактирование поста",
+            "button_name": "Сохранить",
         }
         return render(request, "python_blog/post_create.html", context=context)
