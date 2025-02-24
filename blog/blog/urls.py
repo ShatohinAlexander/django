@@ -24,7 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('posts/', include('python_blog.urls')),
     path('about/', about, name = 'about'),
-    path('', main, name = 'main')
+    path('users/', include('users.urls')),
+    path('', main, name = 'main'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
