@@ -40,9 +40,12 @@
         </div>
     </div>
 
+    
+
     <!-- Кнопка возврата -->
     <div class="row mt-4">
         <div class="col-12">
+            <a href="{% url "blog:post_update" post.slug %}" class="btn btn-danger my-3 float-end">Изменить</a>
             <a href="{% url 'blog:posts' %}" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-left"></i> Вернуться к списку постов
             </a>
